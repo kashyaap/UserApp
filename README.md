@@ -27,12 +27,6 @@ venv\Scripts\activate    # For Windows
 pip install -r requirements.txt
 ```
 
-Ensure that **Pillow** is installed for handling image uploads:
-
-```bash
-pip install Pillow
-```
-
 ### 4. Database Setup
 
 ```bash
@@ -72,8 +66,7 @@ POST /api/signup/
   "email": "johndoe@example.com",
   "phone_number": "1234567890",
   "password": "securepassword",
-  "bio": "Loves coding",
-  "profile_picture": null
+  "bio": "Loves coding"
 }
 ```
 
@@ -145,78 +138,6 @@ POST /api/search/
 ```
 
 ---
-
-## Project Structure
-
-```
-UserApp/
-│
-├── UserApp/
-│   ├── __init__.py
-│   ├── settings.py
-│   ├── urls.py
-│   ├── wsgi.py
-│   ├── asgi.py
-│
-├── api/
-│   ├── __init__.py
-│   ├── models.py
-│   ├── serializers.py
-│   ├── views.py
-│   ├── admin.py
-│
-├── migrations/
-│   ├── 0001_initial.py
-│   ├── __init__.py
-│
-├── manage.py
-└── requirements.txt
-```
-
----
-
-## Key Points of Implementation
-
-### Models
-
-- **UserDetail** – Extends Django’s User model by adding phone number, bio, and profile picture.
-- **Unique Constraints** – Enforced on `username` and the combination of `phone_number` and `email` to prevent duplicates.
-
-```python
-class UserDetail(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    username = models.CharField(max_length=150, unique=True)
-    email = models.EmailField()
-    phone_number = models.CharField(max_length=15)
-    profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
-```
-
----
-
-### Signals
-
-- Automatically creates or updates `UserDetail` when a `User` is created/updated.
-
-```python
-@receiver(post_save, sender=User)
-def create_or_update_user_detail(sender, instance, created, **kwargs):
-    UserDetail.objects.update_or_create(user=instance)
-```
-
----
-
-### Error Handling
-
-- **ValidationError** – Raised for duplicate usernames or phone/email combinations.
-- **IntegrityError** – Caught and handled to avoid server crashes when a unique constraint fails.
-
-```python
-except IntegrityError:
-    return Response(
-        {"error": "A user with these details already exists."},
-        status=status.HTTP_400_BAD_REQUEST
-    )
-```
 
 ## Contact
 
